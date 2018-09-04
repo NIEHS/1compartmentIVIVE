@@ -1,0 +1,6 @@
+CASRN	Chemical	Fub	renal.clearance	intrinsic.clearance	MW
+57-63-6	Ethinyl estradiol	0.47	0.0376	1.602517548	296.4034
+50-28-2	Estradiol	0.053	0.00424	1.00001655	272.382
+10540-29-1	Tamoxifen	0.005	0.0004	0.5681988	371.5146
+446-72-0	Genistein  	0.3	0.024	1.2464361	270.2369
+80-05-7	Bisphenol A	0.06	0.0048	0.15512094	228.2863

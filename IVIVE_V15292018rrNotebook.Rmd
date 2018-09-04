@@ -1,0 +1,105 @@
+---
+Title: ICE 1-Compartment IVIVE Workflow
+Author: Ruhi Rai, core code by Xiaoqing Chang
+Date: July 25, 2018
+Notes: Uses ivive code version 1.0
+---
+# Description: 
+The workflow uses the one-compartment rat PK model that incorporates Monte Carlo simulation to simulate the population variance. The workflow is to predict the daily equivalent administered dose (EAD, mg/kg/day) that would lead to steady state blood concentration equivalent to the bioactive concentration from in vitro assays and compared to the predicted lowest effective levels (LELs) of in vivo assays, which is user provided
+
+## Input: 
+
+To execute the IVIVE workflow, the required inputs are-
+
+f0 = Table with the following column names: CASRN, Chemical(chemical name), Fub (fraction of chemical unbound to protein), CLrenal (renal clearance) and CLintrin (intrinsic clearance). 
+*Note: these values can be obtained from ICE*
+f1 = Table with CASRN, Chemical(chemical name) and in vitro active concentrations (in acc or ac50, units are uM)
+*Note: these values can be obtained from ICE*
+nsamples <- 100 # Number of times the Monte Carlo simulation is done for the population distributions. Any number between 10 - 10,000
+quantile  <- 1 # user-provided, chosen from 1-5 (5th, 25th, 50th, 75th and 95th percentile for Css at 1mg/kg/day)
+
+----
+## Output: 
+
+The outputs of the workflow are the EAD estimates from in vitro assays with or without in vivo fu adjustment. 
+
+
+# R packages required for executing code stringr, dplyr, tidyr, scales, grid, ggplot2 #
+# warnings may appear if the packages and their dependencies are not loaded in the enviornment. If stringi pacakage is not installed along with stringr, str_c function will not execute and print error messages.
+---
+## Setup
+
+Load required libraries and input files/values.
+```{r}
+source("IVIVE_V15292018rr.R")
+library(stringr)
+library(dplyr)
+library(tidyr)
+date.string <-Sys.Date()
+f0 <- '\\Input data for Css_rat32_0.25kg (5 chem).txt' 
+f1 <- '\\In vitro assay data (5 chem).txt'
+nsamples <- 300 
+
+```
+## Executing the workflow
+
+To run the workflow load the input files. Note the first 2 columns must be "CASRN" and "Chemical", respecitively
+"A" contains clearance information and information about the chemicals
+```{r}
+A <- read.table(str_c(getwd(),  f0), sep = "\t", header = TRUE)
+A
+```
+
+"inVitro" contains information on the assays, either ACC or AC50 in uM units 
+```{r}
+inVitro <- read.table(str_c(getwd(),  f1), sep = "\t", header = TRUE)
+inVitro
+```
+
+Steady State function predicts steady state blood concentration at 1mg/kg/day at a given *quantile*. In this case it is 50th percentile and 95th percentile of a population distribution
+
+
+```{r}
+sstdata <- steadyState(A,inVitro)
+sstdata
+```
+
+*invitroacc* function predicts equivalent administered dose (EAD) in mg/kg/day that results in steady state blood concentration equal to the given ACC (active concentration at cutoff, in uM) value. AC50 values can also be used.
+
+```{r}
+EADdata <- invitroacc(sstdata, inVitro)
+EADdata
+```
+---
+##Plot EAD predictions 
+
+## Setup
+```{r}
+library(scales)
+library(grid)
+library(ggplot2)
+source("theme_complete_bw.R")
+wth      <- 0.2  # user-provided, the width of the boxplot (for plot)
+size     <- 5  # user-provided, the size of shape indicating in vivo data points (for plot)
+Output.EAD.total <- cbind(EADdata[,1:2], EADdata[,grep("EAD.total95", names(EADdata),value=TRUE)])
+EAD.total.up <- Output.EAD.total %>% gather("Category", "EAD.total", 3:5)
+```
+---
+## Plotting EAD predictions
+
+```{r}
+plot1 <- ggplot() + geom_boxplot(data=EAD.total.up, aes(x=Chemical, y=EAD.total),colour = "darkgreen",outlier.colour = "NA", outlier.shape = 16, width=wth) +
+  theme_complete_bw() + #set background to white instead of gray
+  ggtitle("EAD_Total (mg/kg/day)\n") +
+  theme(axis.text.x=element_text(size=15, angle = 45, hjust = 1, colour="black")) +
+  theme(axis.text.y=element_text(size=15, angle = 0, hjust = 1, colour="black")) +
+  scale_y_log10("EAD_Total (mg/kg/day)\n", breaks=trans_breaks("log10", function(x) 10 ^ x)(c(1e-6, 1000000))) +
+  theme(plot.title = element_text(size=20, face="bold"),legend.text = element_text(size = 16), axis.title.x = element_text(size=16,angle=0,face="bold",colour="black"),
+        axis.title.y = element_text(size=14,angle=90,face="bold",colour="black"))  +
+  labs(x='Chemical')
+plot1
+```
+
+```{r}
+sessionInfo()
+```
