@@ -1,1 +1,1 @@
-# 1compartmentIVIVE
+This project provides a workflow for IVIVE calculations (Invitro to InVivo Estimations).  The workflow predicts the daily equivalent administered dose (EAD, mg/kg/day) that would lead to steady state blood concentration equivalent to the bioactive concentration from in vitro assays and compared to the predicted lowest effective levels (LELs) of in vivo assays, which is user provided
