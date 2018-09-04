@@ -10,7 +10,7 @@
 # To validate the results, the EADs were compared to the lowest effective levels in rat uterotrophic assays.#
 # R packages required for executing code are stringr, readxl, dplyr, tidyr, scales, grid, ggplot2 #
 # R function required for executing code is theme_complete_bw.R #
-# wd <- "C:\\Users\\rrai\\Desktop\\NICEATM\\Xiaoqing\\IVIVEworkflow\\SentToSciome_19Jan2018\\SentToSciome_19Jan2018"
+# wd <- "C:\\working_directory"
 # setwd(wd)
 # date.string <-Sys.Date()
 # f0 <- '/Input data for Css_rat32_0.25kg (5 chem).xlsx'
